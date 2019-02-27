@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 		for (int idx = 0; idx <k; idx++) {
 			double dist = get<0>(dist_names_list[idx]);
 			//cerr<<get<1>(dist_names_list[idx])<<" "<<get<0>(dist_names_list[idx])<<endl;
-			if (strstr(get<1>(dist_names_list[idx]).c_str(), "_G2M"))
+			if (strstr(get<1>(dist_names_list[idx]).c_str(), "_G2"))
 				num_G2M += 1; //(dist) ? 1.0/dist : 0;
 			else if (strstr(get<1>(dist_names_list[idx]).c_str(),"_G1"))
 				num_G1 += 1; //(dist) ? 1.0/dist : 0; //get<0>(dist_names_list[idx]);
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 				num_S += 1; //(dist) ? 1.0/dist : 0; //get<0>(dist_names_list[idx]);
 		}
 
-		if ( ((num_G2M >= num_G1) and (num_G2M >= num_S) and strstr(test_cell_names[i].c_str(),"_G2M")) or
+		if ( ((num_G2M >= num_G1) and (num_G2M >= num_S) and strstr(test_cell_names[i].c_str(),"_G2")) or
 			 ((num_G1 >= num_G2M) and (num_G1 >=  num_S) and strstr(test_cell_names[i].c_str(),"_G1")) or
 			 ((num_S >= num_G2M) and (num_S >= num_G1) and  strstr(test_cell_names[i].c_str(),"_S"))) { 
 			total_correct += 1;

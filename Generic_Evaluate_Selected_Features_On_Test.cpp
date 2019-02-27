@@ -22,8 +22,9 @@ int main(int argc, char *argv[])
 {
 	vector<int> available_train_gene_indeces;
 	string test_file_prefix = argv[1];	
-	int k = stoi(argv[2]);
-	for (int i = 3; i < argc; ++i){
+	string train_file_prefix = argv[2];	
+	int k = stoi(argv[3]);
+	for (int i = 4; i < argc; ++i){
 		int gene_index = stoi(argv[i]);
 		available_train_gene_indeces.push_back(gene_index);
 	}
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
 
 	// read in train gene names
 	vector<string> canonical_train_gene_names;
-	ifstream file("SC_df_z_train_genes.csv");
+	ifstream file(train_file_prefix + "_genes.csv");
 	string line = "";
 	getline(file, line);
 	boost::algorithm::split(canonical_train_gene_names, line, boost::is_any_of(","));
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
 
 	// read in train cell names
 	vector<string> train_cell_names;
-	ifstream file2("SC_df_z_train_cells.csv");
+	ifstream file2(train_file_prefix + "_cells.csv");
 	getline(file2, line);
 	boost::algorithm::split(train_cell_names, line, boost::is_any_of(","));
 	file2.close();
@@ -65,14 +66,24 @@ int main(int argc, char *argv[])
 
 	// read in the train data matrix
 	vector<vector<double>> trainDataMatrix;
-	ifstream file4("SC_df_z_train_array.csv");		
+	ifstream file4(train_file_prefix + "_array.csv");		
 	while (getline(file4, line))
 	{
 		vector<double> row;
-		stringstream ss(line);
-		double d = 0.0;
-    	while (ss >> d)
-        	row.push_back(d);
+		stringstream tokenStream(line);
+		string token;
+		int counter = 0;
+		while (getline(tokenStream, token, ' ')){
+			if (token == "nan") {
+				row.push_back(0.0);
+				//cout<<"removing gene from can use set: "<<canonical_test_gene_names[counter]<<endl;
+				available_train_gene_indeces.erase(remove(available_train_gene_indeces.begin(),\
+				available_train_gene_indeces.end(), counter), available_train_gene_indeces.end());
+			} else {	
+				row.push_back(stod(token));
+			}
+			counter += 1;
+		}
 		trainDataMatrix.push_back(row);
 	}
 	file4.close();
@@ -131,9 +142,12 @@ int main(int argc, char *argv[])
 	if (can_use_train_gene_indeces.size() != can_use_test_gene_indeces.size()) {
 		cout<< "Major bug!, sizes of indeces for test and train do not match!!!"<<endl;
 	}
-
 	int gene_indeces_size = can_use_train_gene_indeces.size();
 	cout<<"size of gene intersection is "<<gene_indeces_size<<endl;
+
+	//for (int m = 0; m <= gene_indeces_size; m++)
+	//	cout<<testDataMatrix[0][m]<<" "<<trainDataMatrix[0][m]<<endl;
+
 	double total_correct = 0;
 		// go through all the test cells one by one 	
 	for(int i = 0; i < test_cell_names.size(); i++) { //30; i++) {
@@ -141,7 +155,7 @@ int main(int argc, char *argv[])
 		vector<double> test_cell = testDataMatrix[i];
 		cout<<"Test cell is "<<test_cell_names[i]<<endl;
 		// go through all the train cells one by one
-		for(int j = 0; j < 500; j++){
+		for(int j = 0; j < train_cell_names.size(); j++){
 			vector<double> train_cell = trainDataMatrix[j];
 			//cout<<"Train cell is "<<cell_names[j]<<endl;
 
@@ -159,7 +173,9 @@ int main(int argc, char *argv[])
 			transform(test_vector.begin(), test_vector.end(), train_vector.begin(), back_inserter(auxiliary),//
 			[](double element1, double element2) {return pow((element1-element2),2);});
 			double distance = sqrt(accumulate(auxiliary.begin(), auxiliary.end(), 0.0));
-			//cout<<distance<<endl;
+		/*	if (i == j) {
+				cout<<distance<<endl;
+			}*/
 
 			// record distance 
 			dist_names_list.push_back(make_tuple(distance, train_cell_names[j])); //cell_type_names[j]));
@@ -169,13 +185,13 @@ int main(int argc, char *argv[])
 		// sort the training cells based on distances, get the best one for now
 		sort(dist_names_list.begin(), dist_names_list.end());
 	
-		double sum_q = 0.0;
+	/*	double sum_q = 0.0;
 		for (int q = 0; q < 10; q++)
 			sum_q += get<0>(dist_names_list[0]);
 		if (sum_q == 0.0) {
 			total_correct += 0.33;
 			continue;
-		}
+		}*/
 		double num_G2M = 0.0;
 		double num_G1 = 0.0;
 		double num_S = 0.0;

@@ -118,7 +118,7 @@ int main()
 				total_correct += 0.33;
 			} else {
 				string best_train_name = get<1>(dist_names_list[0]);
-				if ((strstr(best_train_name.c_str(),"_G2M")	and strstr(cell_names[i].c_str(),"_G2M")) or
+				if ((strstr(best_train_name.c_str(),"_G2")	and strstr(cell_names[i].c_str(),"_G2")) or
 					(strstr(best_train_name.c_str(),"_G1") and strstr(cell_names[i].c_str(),"_G1")) or
 					(strstr(best_train_name.c_str(),"_S") and strstr(cell_names[i].c_str(),"_S"))) {
 						total_correct += 1;
