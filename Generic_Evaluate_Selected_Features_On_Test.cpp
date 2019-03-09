@@ -132,28 +132,38 @@ int main(int argc, char *argv[])
 		}	
 	}
 	
-	cout<<"train gene names we can use"<<endl;
+	//cout<<"train gene names we can use"<<endl;
 	for (auto i = can_use_train_gene_indeces.begin(); i != can_use_train_gene_indeces.end(); ++i)
-    	cout << canonical_train_gene_names[*i] << ' ';
-	cout<<endl<<"test gene names we can use"<<endl;
+    	//cout << canonical_train_gene_names[*i] << ' ';
+	//cout<<endl<<"test gene names we can use"<<endl;
 	for (auto i = can_use_test_gene_indeces.begin(); i != can_use_test_gene_indeces.end(); ++i)
-    	cout << canonical_test_gene_names[*i] << ' ';
-	cout<<endl;	
+    	//cout << canonical_test_gene_names[*i] << ' ';
+	//cout<<endl;	
 	if (can_use_train_gene_indeces.size() != can_use_test_gene_indeces.size()) {
 		cout<< "Major bug!, sizes of indeces for test and train do not match!!!"<<endl;
 	}
 	int gene_indeces_size = can_use_train_gene_indeces.size();
-	cout<<"size of gene intersection is "<<gene_indeces_size<<endl;
+	//cout<<"size of gene intersection is "<<gene_indeces_size<<endl;
 
 	//for (int m = 0; m <= gene_indeces_size; m++)
 	//	cout<<testDataMatrix[0][m]<<" "<<trainDataMatrix[0][m]<<endl;
 
-	double total_correct = 0;
-		// go through all the test cells one by one 	
+	double total_correct = 0; 
+	double S_tp = 0;
+	double S_fp = 0;
+	double S_fn = 0;
+	double G2M_tp = 0;
+	double G2M_fp = 0;
+	double G2M_fn = 0;
+	double G1_tp = 0;
+	double G1_fp = 0;
+	double G1_fn = 0;
+
+	// go through all the test cells one by one 	
 	for(int i = 0; i < test_cell_names.size(); i++) { //30; i++) {
 		vector<tuple<double, string> > dist_names_list;
 		vector<double> test_cell = testDataMatrix[i];
-		cout<<"Test cell is "<<test_cell_names[i]<<endl;
+		//cout<<"Test cell is "<<test_cell_names[i]<<endl;
 		// go through all the train cells one by one
 		for(int j = 0; j < train_cell_names.size(); j++){
 			vector<double> train_cell = trainDataMatrix[j];
@@ -213,9 +223,54 @@ int main(int argc, char *argv[])
 			total_correct += 1;
 
 		}
+		if ((num_G2M >= num_G1) and (num_G2M >= num_S)) { // predicted G2
+			if (strstr(test_cell_names[i].c_str(),"_G2")) {
+				G2M_tp += 1;
+			} else {
+				G2M_fn += 1;
+				if (strstr(test_cell_names[i].c_str(),"_G1")) {
+					G1_fp += 1;
+				} else if (strstr(test_cell_names[i].c_str(),"_S")) {
+					S_fp += 1;
+				}	
+			}
+		} else if ((num_G1 >= num_G2M) and (num_G1 >=  num_S)) { // predicted G1
+			if (strstr(test_cell_names[i].c_str(),"_G1")) {
+				G1_tp += 1;
+			} else {
+				G1_fn += 1;
+				if (strstr(test_cell_names[i].c_str(),"_G2")) {
+					G2M_fp += 1;
+				} else if (strstr(test_cell_names[i].c_str(),"_S")) {
+					S_fp += 1;
+				}	
+			}
+		} else if ((num_S >= num_G2M) and (num_S >= num_G1)) { // predicted S
+			if (strstr(test_cell_names[i].c_str(),"_S")) {
+				S_tp += 1;
+			} else {
+				S_fn += 1;
+				if (strstr(test_cell_names[i].c_str(),"_G2")) {
+					G2M_fp += 1;
+				} else if (strstr(test_cell_names[i].c_str(),"_G1")) {
+					G1_fp += 1;
+				}	
+			}
+		}
 	}
-	cout<<round(total_correct)<<endl;
-	cout<<round(total_correct)/test_cell_names.size()<<endl;
+	cout<<setprecision(3)<<round(total_correct)/test_cell_names.size()<<endl;
+
+	// for f1 score calculation
+	double S_precision = S_tp ? S_tp / (S_tp + S_fp) : 0.0;
+	double S_recall = S_tp ? S_tp / (S_tp + S_fn) : 0.0;
+	double G2M_precision =  G2M_tp ? G2M_tp / (G2M_tp + G2M_fp) : 0.0;
+	double G2M_recall = G2M_tp ? G2M_tp / (G2M_tp + G2M_fn) : 0.0; 
+	double G1_precision = G1_tp ? G1_tp / (G1_tp + G1_fp) : 0.0; 
+	double G1_recall = G1_tp ? G1_tp / (G1_tp + G1_fn) : 0.0; 
+	double precision_avg = (S_precision + G2M_precision + G1_precision)/3;
+	double recall_avg = (S_recall + G2M_recall + G1_recall)/3;
+	double f1_score = 2*((precision_avg*recall_avg)/(precision_avg+recall_avg));
+	cout<<setprecision(3)<<f1_score<<endl;
 }
 
 

@@ -6,12 +6,14 @@ import json
 
 #test_file_prefix = "bulk_mESC" 
 #test_file_prefix = "microarray_leg";
-test_file_prefix = "mESC";
+#test_file_prefix = "mESC";
 #test_file_prefix = "stahlberg";
 #test_file_prefix = "big_430";
+#test_file_prefix = "big_930";
+test_file_prefix_list = ["big_430", "stahlberg", "mESC", "microarray_leg", "bulk_mESC", "big_930"]
 
-train_file_prefix = "microarray_leg_test"
-#train_file_prefix = "SC_df_z_train"
+#train_file_prefix = "microarray_leg_test"
+train_file_prefix = "SC_df_z_train"
 
 #canonical_gene_list = list() 
 #with open('SC_df_z_train_genes.csv', 'r') as f:
@@ -29,18 +31,30 @@ train_file_prefix = "microarray_leg_test"
 #print(canonical_gene_list_indeces)
 
 canonical_gene_list_indeces = list()
-for i in range(0, 1230): #252):
+#for i in range(0, 1230): #252): # 252 for 430 gene set, 1230 for micro-array as reference
+for i in range(0, 252):
 	canonical_gene_list_indeces.append(str(i))	
-print(canonical_gene_list_indeces)
+#print(canonical_gene_list_indeces)
 
-k = 20 
-args = ['./Generic_Evaluate_Selected_Features_On_Test', test_file_prefix, train_file_prefix, str(k)]
-args += canonical_gene_list_indeces 
-p = subprocess.Popen(args, stdout=PIPE, stderr=PIPE)
+#k = 20 
+k = 10 
+accuracies = list()
+f1_scores = list()
+for test_file_prefix in test_file_prefix_list:
+	args = ['./Generic_Evaluate_Selected_Features_On_Test', test_file_prefix, train_file_prefix, str(k)]
+	args += canonical_gene_list_indeces 
+	p = subprocess.Popen(args, stdout=PIPE, stderr=PIPE)
 
-stdout, stderr = p.communicate()
-val = stdout.decode("utf-8")
-err = stderr.decode("utf-8")
+	stdout, stderr = p.communicate()
+	vals = stdout.decode("utf-8").split("\n")
+	err = stderr.decode("utf-8")
+	
+	accuracies.append(vals[0])
+	f1_scores.append(vals[1])	
 
-print(val)
-print(err)
+accs = "\"kNN_MA k=10 all f\",\"" + "\",\"".join(accuracies) + "\""
+f1s = "\"kNN_MA k=10 all f\",\"" + "\",\"".join(f1_scores) + "\""
+print("Accuracies")
+print(accs)
+print("F1 Scores")
+print(f1s)

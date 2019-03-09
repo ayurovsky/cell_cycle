@@ -1,4 +1,5 @@
 #include <array>
+#include <random>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -89,8 +90,10 @@ int main(int argc, char *argv[])
 	cout<<"size of gene intersection is "<<gene_indeces_size<<endl;
 
 
+	srand(time(NULL));
 	// go through all the test cells one by one 	
 	double total_error = 0.0;
+	double total_monkey_error = 0.0;
 	double total_g1_error = 0.0;
 	double total_g2_error = 0.0;
 	double total_s_error = 0.0;
@@ -98,12 +101,13 @@ int main(int argc, char *argv[])
 	int num_g2 = 0;
 	int num_s = 0;
 	double total_pvalue = 0.0;
+	vector<string> predicted_angles;
 	for(int i = 0; i < train_cell_names.size(); i++) {
 		cout<<endl<<"starting for cell "<<i<<endl;
 		vector<tuple<double, double> > dist_names_list;
 		vector<double> test_cell = trainDataMatrix[i];
-		double total_range = 0.0;
-		string phase = "";
+		double total_range = 2 * M_PI;
+		/*string phase = "";
 		if (strstr(train_cell_names[i].c_str(), "_G1"))
 			phase = "g1";	
 			total_range = 5.9 - 4.8;
@@ -112,17 +116,17 @@ int main(int argc, char *argv[])
 			total_range = 4.8 - 2;
 		if (strstr(train_cell_names[i].c_str(), "_S"))
 			phase = "s";
-			total_range = 2.0 + (6.283 - 5.9);
+			total_range = 2.0 + (6.283 - 5.9);*/
 		// go through all the train cells one by one
-		// train cells are all cells of the same phase and not identical to the test cell
+		// train cells are all cells not identical to the test cell
 		cout<<"_"<<train_cell_names[i]<<endl;
 		for(int j = 0; j < train_cell_names.size(); j++){
 			if (i == j)
 				continue;
-			if (not ( (strstr(train_cell_names[i].c_str(), "_G1") and (strstr(train_cell_names[j].c_str(), "_G1")))
+			/*if (not ( (strstr(train_cell_names[i].c_str(), "_G1") and (strstr(train_cell_names[j].c_str(), "_G1")))
 				or   (strstr(train_cell_names[i].c_str(), "_G2") and (strstr(train_cell_names[j].c_str(), "_G2")))
 				or   (strstr(train_cell_names[i].c_str(), "_S") and (strstr(train_cell_names[j].c_str(), "_S")))))
-				continue;
+				continue;*/
 			vector<double> train_cell = trainDataMatrix[j];
 			//cout<<"Train cell is "<<cell_names[j]<<endl;
 
@@ -164,6 +168,24 @@ int main(int argc, char *argv[])
 		cout<<train_cell_angles[i]<<" "<<avg_angle<<endl;
 		double test_error = abs(train_cell_angles[i] - avg_angle)/total_range;
 		cout<<"Error is: "<<test_error<<endl;
+		total_error += test_error;
+		
+		// add to predicted labels
+		predicted_angles.push_back(to_string(avg_angle));
+	
+		// Now get the monkey error
+		double sum_random_error = 0.0;
+		int num_repeat = 1000;
+		//random.seed();
+		for (int p=0; p<num_repeat; p++) { 
+
+			avg_angle =  ((float)rand() / RAND_MAX) * total_range;  
+			double rand_error = abs(train_cell_angles[i] - avg_angle)/total_range;
+			sum_random_error += rand_error;
+		}
+		double cell_random_error = sum_random_error/num_repeat;
+		cout<<"Random Monkey error is: "<<cell_random_error;
+		total_monkey_error += cell_random_error;
 
 		// now get the p-value for the error
 		/*auto rng = default_random_engine {};
@@ -188,8 +210,7 @@ int main(int argc, char *argv[])
 		}
 		total_pvalue += counter/num_permute;
 		cout<<"p-value for "<<i<<" is: "<<counter/num_permute<<endl;*/
-		total_error += test_error;
-		if (phase == "g1") {
+		/*if (phase == "g1") {
 			num_g1 += 1;
 			total_g1_error += test_error;
 		} else if (phase == "g2") {
@@ -198,16 +219,21 @@ int main(int argc, char *argv[])
 		} else if (phase == "s") {
 			num_s += 1;
 			total_s_error += test_error;
-		}
+		}*/
 			
 		//break;
 	}
 	cout<<"Done"<<endl;
 	cout<<"Average error: "<<total_error/(train_cell_names.size()-1)<<endl;
+	cout<<"Average Monkey error: "<<total_monkey_error/(train_cell_names.size()-1)<<endl;
 	//cout<<"Average pvalue: "<<total_pvalue/(train_cell_names.size()-1)<<endl;
-	cout<<"G1 Average Error: "<<total_g1_error/num_g1<<endl;
+	/*cout<<"G1 Average Error: "<<total_g1_error/num_g1<<endl;
 	cout<<"G2 Average Error: "<<total_g2_error/num_g2<<endl;
-	cout<<"S Average Error: "<<total_s_error/num_s<<endl;
+	cout<<"S Average Error: "<<total_s_error/num_s<<endl;*/
+	ofstream outfile(train_file_prefix + "_predicted_angles.csv");
+	string joined_output = boost::algorithm::join(predicted_angles, ",");
+	outfile<<joined_output<<"\n";
+	outfile.close();
 }
 
 
