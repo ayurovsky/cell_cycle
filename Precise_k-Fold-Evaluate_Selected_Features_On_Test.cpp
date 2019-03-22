@@ -106,7 +106,6 @@ int main(int argc, char *argv[])
 		cout<<endl<<"starting for cell "<<i<<endl;
 		vector<tuple<double, double> > dist_names_list;
 		vector<double> test_cell = trainDataMatrix[i];
-		double total_range = 2 * M_PI;
 		/*string phase = "";
 		if (strstr(train_cell_names[i].c_str(), "_G1"))
 			phase = "g1";	
@@ -166,7 +165,7 @@ int main(int argc, char *argv[])
 		if (avg_angle < 0)
 			avg_angle = 2 * M_PI + avg_angle;
 		cout<<train_cell_angles[i]<<" "<<avg_angle<<endl;
-		double test_error = abs(train_cell_angles[i] - avg_angle)/total_range;
+		double test_error = (M_PI - abs(abs(train_cell_angles[i] - avg_angle) - M_PI))/M_PI;
 		cout<<"Error is: "<<test_error<<endl;
 		total_error += test_error;
 		
@@ -179,8 +178,8 @@ int main(int argc, char *argv[])
 		//random.seed();
 		for (int p=0; p<num_repeat; p++) { 
 
-			avg_angle =  ((float)rand() / RAND_MAX) * total_range;  
-			double rand_error = abs(train_cell_angles[i] - avg_angle)/total_range;
+			avg_angle =  ((float)rand() / RAND_MAX) * 2 * M_PI;  
+			double rand_error = (M_PI - abs(abs(train_cell_angles[i] - avg_angle) - M_PI))/M_PI;
 			sum_random_error += rand_error;
 		}
 		double cell_random_error = sum_random_error/num_repeat;
