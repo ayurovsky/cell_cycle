@@ -314,6 +314,7 @@ int main(int argc, char *argv[])
 	cerr<<"G2 average error is: "<<g2_total_error/num_g2<<endl;
 	cerr<<"S average error is: "<<s_total_error/num_s<<endl;
 	cout<<setprecision(3)<<round(total_correct)/test_cell_names.size()<<endl;
+	cerr<<"Done"<<endl;
 
 	// for f1 score calculation
 	double S_precision = S_tp ? S_tp / (S_tp + S_fp) : 0.0;
