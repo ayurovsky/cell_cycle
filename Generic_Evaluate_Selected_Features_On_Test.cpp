@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 		// go through all the train cells one by one
 		for(int j = 0; j < train_cell_names.size(); j++){
 			vector<double> train_cell = trainDataMatrix[j];
-			//cout<<"Train cell is "<<cell_names[j]<<endl;
+			//cout<<"Train cell is "<<train_cell_names[j]<<endl;
 
 			// select two vectors with distance
 			vector<double> test_vector(gene_indeces_size, 0);	
@@ -186,12 +186,14 @@ int main(int argc, char *argv[])
 		/*	if (i == j) {
 				cout<<distance<<endl;
 			}*/
+			//cout<<"distance is "<<distance<<endl;
 
 			// record distance 
 			dist_names_list.push_back(make_tuple(distance, train_cell_names[j])); //cell_type_names[j]));
 				
 			//break;
 		}
+		//cout<<"Got distances"<<endl;
 		// sort the training cells based on distances, get the best one for now
 		sort(dist_names_list.begin(), dist_names_list.end());
 	

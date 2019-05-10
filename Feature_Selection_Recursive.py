@@ -3,6 +3,7 @@ import os
 from subprocess import Popen, PIPE
 import csv
 import json
+import sys
 
 prefix = "SC_df_z_train"
 #prefix = "microarray_leg_test"
@@ -18,7 +19,7 @@ gene_idx_best_so_far_list = list()
 gene_name_best_so_far_list = list()
 accuracies_list = list()
 print(len(gene_search_list))
-k = 3 
+k = 10
 while(len(gene_idx_best_so_far_list) < len(canonical_gene_list)): #52):
 	counter = 0
 	new_genes_dict = dict()
@@ -54,3 +55,4 @@ while(len(gene_idx_best_so_far_list) < len(canonical_gene_list)): #52):
 	print("Iteration over")
 	print(gene_name_best_so_far_list)
 	print(accuracies_list)
+	sys.stdout.flush()

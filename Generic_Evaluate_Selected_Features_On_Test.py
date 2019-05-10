@@ -10,10 +10,15 @@ import json
 #test_file_prefix = "stahlberg";
 #test_file_prefix = "big_430";
 #test_file_prefix = "big_930";
-test_file_prefix_list = ["big_430", "stahlberg", "mESC", "microarray_leg", "bulk_mESC", "big_930"]
+#test_file_prefix_list = ["big_430", "stahlberg", "mESC", "microarray_leg", "bulk_mESC", "big_930"]
+test_file_prefix_list = ["buettner182"]
+
 
 #train_file_prefix = "microarray_leg_test"
 train_file_prefix = "SC_df_z_train"
+
+#test_file_prefix_list = ["big_430_1_0_quant"]
+#train_file_prefix = "big_500_1_0_quant_train"
 
 #canonical_gene_list = list() 
 #with open('SC_df_z_train_genes.csv', 'r') as f:
@@ -52,8 +57,8 @@ for test_file_prefix in test_file_prefix_list:
 	accuracies.append(vals[0])
 	f1_scores.append(vals[1])	
 
-accs = "\"kNN_MA k=10 all f\",\"" + "\",\"".join(accuracies) + "\""
-f1s = "\"kNN_MA k=10 all f\",\"" + "\",\"".join(f1_scores) + "\""
+accs = "\"quant k=10 all f\",\"" + "\",\"".join(accuracies) + "\""
+f1s = "\"quant k=10 all f\",\"" + "\",\"".join(f1_scores) + "\""
 print("Accuracies")
 print(accs)
 print("F1 Scores")

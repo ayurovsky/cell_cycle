@@ -177,8 +177,12 @@ int main(int argc, char *argv[])
 	int num_g1 = 0;
 	int num_g2 = 0;
 	int num_s = 0;
+
+	ofstream outfile(test_file_prefix + "_k_neighbor_angles.csv");
+
 	// go through all the test cells one by one 	
 	for(int i = 0; i < test_cell_names.size(); i++) { //30; i++) {
+		vector<string> predicted_angles;
 		vector<tuple<double, double> > dist_names_list;
 		vector<double> test_cell = testDataMatrix[i];
 		//cout<<"Test cell is "<<test_cell_names[i]<<endl;
@@ -218,11 +222,15 @@ int main(int argc, char *argv[])
 			//cerr<<get<1>(dist_names_list[idx])<<endl;
 			sine_sum += sin(get<1>(dist_names_list[idx]));
 			cos_sum += cos(get<1>(dist_names_list[idx]));
+			predicted_angles.push_back(to_string(get<1>(dist_names_list[idx])));
 		}
 		double avg_angle = atan2(sine_sum, cos_sum);
 		if (avg_angle < 0)
 			avg_angle = 2 * M_PI + avg_angle;
-		
+
+		predicted_angles.push_back(to_string(avg_angle));
+		// add the real phase to the angles for visualization
+		predicted_angles.push_back(test_cell_names[i].c_str());	
 
 		// transform the precise predicted angle into a coarse phase
 		string predicted_phase = "";
@@ -235,9 +243,9 @@ int main(int argc, char *argv[])
     	else if (avg_angle > 5.9)
         	predicted_phase = "S";
 
-		//cerr<<test_cell_names[i]<<endl;
-		//cerr<<avg_angle<<endl;
-		//cerr<<predicted_phase<<endl;
+		cerr<<test_cell_names[i]<<endl;
+		cerr<<avg_angle<<endl;
+		cerr<<predicted_phase<<endl;
 
 		double one_way;
 		double other_way;
@@ -309,12 +317,16 @@ int main(int argc, char *argv[])
 				}	
 			}
 		}
+		string joined_output = boost::algorithm::join(predicted_angles, ",");
+		outfile<<joined_output<<"\n";
 	}
+	outfile.close();
 	cerr<<"G1 average error is: "<<g1_total_error/num_g1<<endl;
 	cerr<<"G2 average error is: "<<g2_total_error/num_g2<<endl;
 	cerr<<"S average error is: "<<s_total_error/num_s<<endl;
 	cout<<setprecision(3)<<round(total_correct)/test_cell_names.size()<<endl;
 	cerr<<"Done"<<endl;
+
 
 	// for f1 score calculation
 	double S_precision = S_tp ? S_tp / (S_tp + S_fp) : 0.0;
